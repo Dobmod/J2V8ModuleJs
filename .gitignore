@@ -1,3 +1,4 @@
 .idea
 out/production
 J2V8ModuleJS.iml
+out/artifacts/J2V8ModuleJs_jar/j2v8_win32_x86_64-4.6.0.jar

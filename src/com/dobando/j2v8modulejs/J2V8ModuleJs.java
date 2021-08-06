@@ -7,12 +7,12 @@ import com.eclipsesource.v8.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class J2V8ModuleJS {
+public class J2V8ModuleJs {
 
-    private String entrance;
-    private V8 runtime;
+    private final String entrance;
+    private final V8 runtime;
 
-    public J2V8ModuleJS(String entrance) {
+    public J2V8ModuleJs(String entrance) {
         this.entrance = entrance;
         this.runtime = V8.createV8Runtime();
     }

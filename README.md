@@ -24,14 +24,14 @@ dependencies{
 ### **Main.java**  
 
 ```java  
-J2V8ModuleJS moduleJS = new J2V8ModuleJS("/../../main.js");
+J2V8ModuleJs moduleJs = new J2V8ModuleJs("/../../main.js");
 try {
-    moduleJS.init(true);//初始化并开启print函数，以便调试
+    moduleJs.init(true);//初始化并开启print函数，以便调试
+    moduleJs.execute();//执行
 }catch (FileNotFoundException e){
     e.printStackTrace();
 }
-moduleJS.execute();//执行
-moduleJS.release();//释放资源
+moduleJs.release();//释放资源
 ```  
 
 ### **main.js**  
@@ -48,7 +48,7 @@ exports.sayHello = function(){
 ```
 
 ## **Download**  
-* [jar](out/artifacts/J2V8ModuleJS_jar/J2V8ModuleJS.jar)  
+* [jar](https://raw.githubusercontent.com/Dobmod/J2V8ModuleJs/main/out/artifacts/J2V8ModuleJS_jar/J2V8ModuleJS.jar)  
 
 ## **Addtional**
 ```java
