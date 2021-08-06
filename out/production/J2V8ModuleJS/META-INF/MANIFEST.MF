@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: com.dobando.j2v8modulejs.Main
-Class-Path: j2v8_win32_x86_64-4.6.0.jar
-
