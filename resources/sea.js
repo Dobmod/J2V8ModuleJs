@@ -1,5 +1,6 @@
 /**
  * Sea.js 3.0.0 | seajs.org/LICENSE.md
+ * 原Sea.js仅支持在浏览器运行，经修改后可在J2V8运行
  */
 (function (global, undefined) {
 
@@ -273,24 +274,6 @@
     loaderPath = "sea.js"
     loaderDir = getCwd()
   }
-  else {
-    var doc = document
-    var scripts = doc.scripts
-
-    // Recommend to add `seajsnode` id for the `sea.js` script element
-    var loaderScript = doc.getElementById("seajsnode") ||
-      scripts[scripts.length - 1]
-
-    function getScriptAbsoluteSrc(node) {
-      return node.hasAttribute ? // non-IE6/7
-        node.src :
-        // see http://msdn.microsoft.com/en-us/library/ms536429(VS.85).aspx
-        node.getAttribute("src", 4)
-    }
-    loaderPath = getScriptAbsoluteSrc(loaderScript)
-    // When `sea.js` is inline, set loaderDir to current working directory
-    loaderDir = dirname(loaderPath || cwd)
-  }
 
   /**
    * util-request.js - The utilities for requesting script and style files
@@ -310,79 +293,7 @@
     // For Developers
     seajs.request = requestFromWebWorker;
   }
-  else {
-    var doc = document
-    var head = doc.head || doc.getElementsByTagName("head")[0] || doc.documentElement
-    var baseElement = head.getElementsByTagName("base")[0]
-
-    var currentlyAddingScript
-
-    function request(url, callback, charset) {
-      var node = doc.createElement("script")
-
-      if (charset) {
-        var cs = isFunction(charset) ? charset(url) : charset
-        if (cs) {
-          node.charset = cs
-        }
-      }
-
-      addOnload(node, callback, url)
-
-      node.async = true
-      node.src = url
-
-      // For some cache cases in IE 6-8, the script executes IMMEDIATELY after
-      // the end of the insert execution, so use `currentlyAddingScript` to
-      // hold current node, for deriving url in `define` call
-      currentlyAddingScript = node
-
-      // ref: #185 & http://dev.jquery.com/ticket/2709
-      baseElement ?
-        head.insertBefore(node, baseElement) :
-        head.appendChild(node)
-
-      currentlyAddingScript = null
-    }
-
-    function addOnload(node, callback, url) {
-      var supportOnload = "onload" in node
-
-      if (supportOnload) {
-        node.onload = onload
-        node.onerror = function () {
-          emit("error", { uri: url, node: node })
-          onload(true)
-        }
-      }
-      else {
-        node.onreadystatechange = function () {
-          if (/loaded|complete/.test(node.readyState)) {
-            onload()
-          }
-        }
-      }
-
-      function onload(error) {
-        // Ensure only run once and handle memory leak in IE
-        node.onload = node.onerror = node.onreadystatechange = null
-
-        // Remove the script to reduce memory leak
-        if (!data.debug) {
-          head.removeChild(node)
-        }
-
-        // Dereference the node
-        node = null
-
-        callback(error)
-      }
-    }
-
-    // For Developers
-    seajs.request = request
-
-  }
+  
   var interactiveScript
 
   function getCurrentScript() {

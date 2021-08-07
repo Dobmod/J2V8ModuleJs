@@ -13,11 +13,7 @@ A modular Js engine based on J2V8，基于J2V8实现的模块化Js引擎
 ```gradle  
 dependencies{
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.eclipsesource.j2v8:j2v8_win32_x86_64:4.6.0'
-    //implementation 'com.eclipsesource.j2v8:j2v8_macosx_x86_64:4.6.0'
-    //implementation 'com.eclipsesource.j2v8:j2v8_linux_x86_64:4.8.0'
-    //implementation 'com.eclipsesource.j2v8:j2v8_android_armv7l:3.0.2'
-    //implementation 'com.eclipsesource.j2v8:j2v8_android_x86:3.0.1'
+    implementation 'com.eclipsesource.j2v8:j2v8:6.2.0'
 }
 ```  
 
@@ -48,11 +44,19 @@ exports.sayHello = function(){
 ```
 
 ## **Download**  
-* [jar](https://raw.githubusercontent.com/Dobmod/J2V8ModuleJs/main/out/artifacts/J2V8ModuleJS_jar/J2V8ModuleJS.jar)  
+* [jar](https://github.com/Dobmod/J2V8ModuleJs/releases)  
 
-## **Addtional**
-```java
+## **Addtional**  
+```java  
 moduleJs.getV8Runtime();//获取V8
+moduleJs.defineModule(String moduleName,String script);//定义一个内部模块
+moduleJs.hasModule(String moduleName);//获取模块是否存在
+moduleJs.setRequireListener(new RequireListener() {
+    @Override
+    public boolean require(String filePath) {
+        return true;
+    }
+});//监听js中require的模块，返回false则拦截require
 ```
 
 

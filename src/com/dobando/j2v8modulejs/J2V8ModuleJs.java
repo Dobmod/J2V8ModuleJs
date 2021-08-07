@@ -6,18 +6,23 @@ import com.eclipsesource.v8.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class J2V8ModuleJs {
 
     private final String entrance;
     private final V8 runtime;
+    private RequireListener requireListener = null;
+    private final Map<String,String> moduleMap;
 
     public J2V8ModuleJs(String entrance) {
         this.entrance = entrance;
         this.runtime = V8.createV8Runtime();
+        this.moduleMap = new HashMap<>();
     }
 
-    public Object execute() {
+    public Object execute() throws V8ScriptExecutionException {
         return runtime.executeScript("seajs.use('"+new File(entrance).getName()+"');");
     }
 
@@ -29,28 +34,21 @@ public class J2V8ModuleJs {
         JavaVoidCallback importCallback = (receiver, parameters) -> {
             if (parameters.length() > 0) {
                 Object arg1 = parameters.get(0);
-                runtime.executeScript(Lexer.parse(FileUtils.readFile(new File(arg1.toString()))));
+                importScript(arg1.toString());
                 if (arg1 instanceof Releasable) {
                     ((Releasable) arg1).release();
                 }
             }
         };
         runtime.registerJavaMethod(importCallback, "importScripts");
-        JavaCallback getCwdCallback = new JavaCallback() {
-            @Override
-            public Object invoke(V8Object v8Object, V8Array v8Array) {
-                return new File(entrance).getParent()+File.separator;
-            }
-        };
+        JavaCallback getCwdCallback = (v8Object, v8Array) -> (new File(entrance).getParent()+File.separator).replaceAll("\\\\","/");
         runtime.registerJavaMethod(getCwdCallback, "getCwd");
-        JavaVoidCallback callback = new JavaVoidCallback() {
-            public void invoke(final V8Object receiver, final V8Array parameters) {
-                if (parameters.length() > 0) {
-                    Object arg1 = parameters.get(0);
-                    System.out.println(arg1);
-                    if (arg1 instanceof Releasable) {
-                        ((Releasable) arg1).release();
-                    }
+        JavaVoidCallback callback = (receiver, parameters) -> {
+            if (parameters.length() > 0) {
+                Object arg1 = parameters.get(0);
+                System.out.println(arg1);
+                if (arg1 instanceof Releasable) {
+                    ((Releasable) arg1).release();
                 }
             }
         };
@@ -64,11 +62,43 @@ public class J2V8ModuleJs {
         return runtime;
     }
 
+    public void setRequireListener(RequireListener listener){
+        this.requireListener = listener;
+    }
+
+    public void defineModule(String moduleName,String script){
+        moduleMap.put(moduleName,script);
+    }
+
+    public boolean hasModule(String moduleName){
+        return moduleMap.containsKey(moduleName);
+    }
+
     public void release() {
+        moduleMap.clear();
         runtime.release(false);
     }
 
     private String loadRequireJs() {
-        return FileUtils.readFile(new File(Thread.currentThread().getContextClassLoader().getResource("sea.js").getPath()));
+        return FileUtils.readFileFromResource("sea.js");
     }
+
+    private void importScript(String filePath) {
+        File scriptFile = new File(filePath);
+        if(scriptFile.exists()) {
+            if (requireListener != null) {
+                boolean canExec = requireListener.require(filePath);
+                if (canExec) runtime.executeScript(Lexer.parse(FileUtils.readFile(new File(filePath))));
+            } else {
+                runtime.executeScript(Lexer.parse(FileUtils.readFile(new File(filePath))));
+            }
+        }else{
+            String moduleName = scriptFile.getName().replace(".js","");
+            System.out.println(moduleName);
+            if(moduleMap.containsKey(moduleName)){
+                runtime.executeScript(Lexer.parse(moduleMap.get(moduleName)));
+            }
+        }
+    }
+
 }

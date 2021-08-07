@@ -20,4 +20,22 @@ public class FileUtils {
         }
         return null;
     }
+    public static String readFileFromResource(String path){
+        try{
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while (true) {
+                assert is != null;
+                if ((len = is.read(buffer)) == -1) break;
+                outputStream.write(buffer, 0, len);
+            }
+            is.close();
+            return outputStream.toString("utf-8");
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
